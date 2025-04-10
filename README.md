@@ -1,4 +1,4 @@
-# Introduction2RL_2024
+# Introduction2RL_2025
 
 
 Additional material for the lecture and exercises held at Paris Lodron University Salzburg in 2024 by me (Simon Hirlaender).
