@@ -120,4 +120,5 @@ if __name__ == '__main__':
 
     plt.suptitle('RMS Error over 100 runs (init V=5.5), non‐terminals 1…5')
     plt.tight_layout()
+    plt.savefig('compare_td_mc.png')
     plt.show()

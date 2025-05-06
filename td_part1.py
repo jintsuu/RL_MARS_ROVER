@@ -36,7 +36,9 @@ def plot_snapshots(snapshots, n_states = 5):
     plt.ylabel('Value')
     plt.legend()
     plt.grid(True)
+    plt.savefig('td_part1.png')
     plt.show()
+
 
 if __name__ == "__main__":
     snapshots = run_td_prediction()

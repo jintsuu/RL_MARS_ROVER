@@ -73,14 +73,21 @@ def true_values_linear_system(n_states):
     return V
 
 if __name__ == '__main__':
+    runs = 100
     t_max = 250
     n_states = 5
 
-    env_td = MarsRoverEnv(n_states=n_states)
-    env_mc = MarsRoverEnv(n_states=n_states)
+    td_sum = np.zeros((5, t_max + 1))
+    mc_sum = np.zeros((5, t_max + 1))
 
-    V_td_hist = run_td_decay(env_td, t_max)
-    V_mc_hist = run_mc_decay(env_mc, t_max)
+    for _ in range(runs):
+        env_td = MarsRoverEnv(n_states=n_states)
+        env_mc = MarsRoverEnv(n_states=n_states)
+        td_sum += run_td_decay(env_td, t_max)
+        mc_sum += run_mc_decay(env_mc, t_max)
+
+    td_avg = td_sum / runs
+    mc_avg = mc_sum / runs
 
     V_true = true_values_linear_system(n_states)
     true_nonterm = V_true[1:-1]
@@ -89,16 +96,16 @@ if __name__ == '__main__':
 
     fig, axes = plt.subplots(5, 1, figsize=(8, 14), sharex=True)
     for i, ax in enumerate(axes, start=1):
-        ax.plot(episodes, V_td_hist[i-1], label='TD(0)')
-        ax.plot(episodes, V_mc_hist[i-1], '--', label='First-Visit MC')
-        ax.axhline(true_nonterm[i-1], color='black', linestyle=':',
-                   label='True $V(s)$' if i==1 else None)
+        ax.plot(episodes, td_avg[i-1], label='TD(0) avg')
+        ax.plot(episodes, mc_avg[i-1], '--', label='MC avg')
+        ax.axhline(true_nonterm[i-1], color='black', linestyle=':', label='True V(s)' if i==1 else None)
         ax.set_ylabel(f'$V(s={i})$')
         ax.grid(True)
         if i == 1:
             ax.legend(loc='upper right')
 
     axes[-1].set_xlabel('Episode')
-    plt.suptitle(r'Decaying $\alpha$: 0.5 $\to$ 0.01 over 250 Episodes')
+    plt.suptitle(r'Averaged over 100 runs, Decaying $\alpha$: 0.5 $\to$ 0.01')
     plt.tight_layout()
+    plt.savefig('alpha_decay.png')
     plt.show()
