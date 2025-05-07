@@ -12,9 +12,7 @@ env_args = dict(
 base_env = MarsRoverEnv(**env_args)
 nS, nA = base_env.nS, base_env.nA
 
-# 2) Value‐Iteration to get Q*
 def compute_optimal_Q(env, gamma=1.0, theta=1e-8):
-    # Initialize Q*(s,a)=0
     Q_star = np.zeros((env.nS, env.nA))
     while True:
         delta = 0.0
@@ -23,7 +21,6 @@ def compute_optimal_Q(env, gamma=1.0, theta=1e-8):
                 old = Q_star[s, a]
                 new = 0.0
                 for (p, s2, r, done) in env.P[s][a]:
-                    # if done, V*(s2)=0
                     new += p * (r + gamma * (0 if done else np.max(Q_star[s2])))
                 Q_star[s, a] = new
                 delta = max(delta, abs(old-new))
@@ -33,7 +30,6 @@ def compute_optimal_Q(env, gamma=1.0, theta=1e-8):
 
 Q_star = compute_optimal_Q(base_env)
 
-# 3) Runner templates: record Q after each episode
 def run_sarsa_Q(env, n_eps):
     Q = np.zeros((nS,nA)); regrets = []
     for ep in range(n_eps):
@@ -47,7 +43,6 @@ def run_sarsa_Q(env, n_eps):
             a2 = env.action_space.sample() if np.random.rand()<ε else np.argmax(Q[s2])
             Q[s,a] += α*(r + Q[s2,a2] - Q[s,a])
             s,a = s2,a2
-        # compute regret after episode ep
         diff = np.abs(Q[1:-1] - Q_star[1:-1])
         regrets.append(diff.mean())
     return np.array(regrets)
@@ -79,7 +74,6 @@ def run_mc_Q(env, n_eps, gamma=1.0):
             s2,r,done,_ = env.step(a)
             episode.append((s,a,r))
             s = s2
-        # MC update
         G=0; seen=set()
         for (s_t,a_t,r_t) in reversed(episode):
             G = gamma*G + r_t
@@ -117,7 +111,6 @@ def run_double_q_Q(env, n_eps, gamma=1.0):
         regrets.append(diff.mean())
     return np.array(regrets)
 
-# 4) Run all and smooth
 n_episodes = 3000
 runs = {
     'SARSA':   run_sarsa_Q,
@@ -140,4 +133,5 @@ plt.ylabel('Mean absolute Q-error')
 plt.legend()
 plt.grid(True)
 plt.tight_layout()
+plt.savefig('plot_regret.png')
 plt.show()
